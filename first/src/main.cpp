@@ -1,20 +1,49 @@
 #include "main.h"
 
-/**
- * A callback function for LLEMU's center button.
- *
- * When this callback is fired, it will toggle line 2 of the LCD text between
- * "I was pressed!" and nothing.
- */
+pros::ADIDigitalOut ledA('A'); /* Green  Driver Control Active */
+pros::ADIDigitalOut ledB('B'); /* Yellow  Not Currently in Driver Mode */
+pros::ADIDigitalOut ledG('G'); /* Green  Pneumatics Available */
+pros::ADIDigitalOut ledH('H'); /* Red  Shit got bad */
+
+
+void on_left_button() {
+	static bool pressed = false;
+	pressed = !pressed;
+	if (pressed) {
+		pros::lcd::set_text(1, "left trigger"); /* lines are numbered 0-7 */
+		ledA.set_value(1);
+	} else {
+		pros::lcd::clear_line(1);
+		ledA.set_value(0);
+	}
+}
+
 void on_center_button() {
 	static bool pressed = false;
 	pressed = !pressed;
 	if (pressed) {
-		pros::lcd::set_text(2, "I was pressed!");
+		pros::lcd::set_text(2, "center trigger");
+		ledB.set_value(1);
 	} else {
 		pros::lcd::clear_line(2);
+		ledB.set_value(0);
 	}
 }
+
+void on_right_button() {
+	static bool pressed = false;
+	pressed = !pressed;
+	if (pressed) {
+		pros::lcd::set_text(3, "right trigger");
+		ledG.set_value(1);
+		ledH.set_value(1);
+	} else {
+		pros::lcd::clear_line(3);
+		ledH.set_value(0);
+		ledH.set_value(0);
+	}
+}
+
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -24,9 +53,12 @@ void on_center_button() {
  */
 void initialize() {
 	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
+	pros::lcd::set_text(0, "59968H");
 
+	pros::lcd::register_btn0_cb(on_left_button);
 	pros::lcd::register_btn1_cb(on_center_button);
+	pros::lcd::register_btn2_cb(on_right_button);
+
 }
 
 /**
@@ -77,6 +109,8 @@ void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 	pros::Motor left_mtr(1);
 	pros::Motor right_mtr(2);
+
+	ledA.set_value(1);	
 
 	while (true) {
 		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
