@@ -1,20 +1,27 @@
 #include "main.h"
 
-pros::ADIDigitalOut ledA('A'); /* Green  Driver Control Active */
-pros::ADIDigitalOut ledB('B'); /* Yellow  Not Currently in Driver Mode */
-pros::ADIDigitalOut ledG('G'); /* Green  Pneumatics Available */
-pros::ADIDigitalOut ledH('H'); /* Red  Shit got bad */
+pros::ADIDigitalOut ledA('A'); /* just a lil bad */
+pros::ADIDigitalOut ledB('B'); /* aight something isn't good here */
+pros::ADIDigitalOut ledC('C'); /* shit got really bad */
+pros::ADIDigitalOut ledH('H'); /* Yayy! */
+
+pros::Motor leftMotor1(11);
+pros::Motor leftMotor2(12);
+pros::Motor leftMotor3(13);
+
+pros::Motor rightMotor1(1);
+pros::Motor rightMotor2(2);
+pros::Motor rightMotor3(3);
+
+pros::MotorGroup leftDrive({leftMotor1, leftMotor2, leftMotor3});
+pros::MotorGroup rightDrive({rightMotor1, rightMotor2, rightMotor3});
 
 
 void on_left_button() {
 	static bool pressed = false;
 	pressed = !pressed;
 	if (pressed) {
-		pros::lcd::set_text(1, "left trigger"); /* lines are numbered 0-7 */
-		ledA.set_value(1);
 	} else {
-		pros::lcd::clear_line(1);
-		ledA.set_value(0);
 	}
 }
 
@@ -22,11 +29,7 @@ void on_center_button() {
 	static bool pressed = false;
 	pressed = !pressed;
 	if (pressed) {
-		pros::lcd::set_text(2, "center trigger");
-		ledB.set_value(1);
 	} else {
-		pros::lcd::clear_line(2);
-		ledB.set_value(0);
 	}
 }
 
@@ -34,13 +37,7 @@ void on_right_button() {
 	static bool pressed = false;
 	pressed = !pressed;
 	if (pressed) {
-		pros::lcd::set_text(3, "right trigger");
-		ledG.set_value(1);
-		ledH.set_value(1);
 	} else {
-		pros::lcd::clear_line(3);
-		ledH.set_value(0);
-		ledH.set_value(0);
 	}
 }
 
@@ -53,7 +50,6 @@ void on_right_button() {
  */
 void initialize() {
 	pros::lcd::initialize();
-	pros::lcd::set_text(0, "59968H");
 
 	pros::lcd::register_btn0_cb(on_left_button);
 	pros::lcd::register_btn1_cb(on_center_button);
@@ -107,20 +103,23 @@ void autonomous() {}
  */
 void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor left_mtr(1);
-	pros::Motor right_mtr(2);
 
-	ledA.set_value(1);	
+	ledH.set_value(0);
+
+	ledA.set_value(1);
+	ledB.set_value(1);
+	ledC.set_value(1);
+
 
 	while (true) {
 		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
 		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
 		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
-		int left = master.get_analog(ANALOG_LEFT_Y);
-		int right = master.get_analog(ANALOG_RIGHT_Y);
+		int leftStick = master.get_analog(ANALOG_LEFT_Y);
+		int rightStick = master.get_analog(ANALOG_RIGHT_Y);
 
-		left_mtr = left;
-		right_mtr = right;
+		leftDrive.move(leftStick);
+		rightDrive.move(rightStick);
 
 		pros::delay(20);
 	}
