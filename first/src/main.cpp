@@ -55,6 +55,12 @@ void initialize() {
 	pros::lcd::register_btn1_cb(on_center_button);
 	pros::lcd::register_btn2_cb(on_right_button);
 
+	/* 0 is On and 1 is Off */
+	ledH.set_value(0);
+	ledA.set_value(1);
+	ledB.set_value(1);
+	ledC.set_value(1);
+
 }
 
 /**
@@ -103,12 +109,6 @@ void autonomous() {}
  */
 void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-
-	ledH.set_value(0);
-
-	ledA.set_value(1);
-	ledB.set_value(1);
-	ledC.set_value(1);
 
 
 	while (true) {
