@@ -1,9 +1,9 @@
 #include "main.h"
 
-pros::ADIDigitalOut ledA('A'); /* just a lil bad */
-pros::ADIDigitalOut ledB('B'); /* aight something isn't good here */
-pros::ADIDigitalOut ledC('C'); /* shit got really bad */
-pros::ADIDigitalOut ledH('H'); /* Yayy! */
+pros::ADIDigitalOut ledA('A');
+pros::ADIDigitalOut ledB('B');
+pros::ADIDigitalOut ledC('C');
+pros::ADIDigitalOut ledH('H');
 
 pros::Motor leftMotor1(11);
 pros::Motor leftMotor2(12);
@@ -15,6 +15,10 @@ pros::Motor rightMotor3(3);
 
 pros::MotorGroup leftDrive({leftMotor1, leftMotor2, leftMotor3});
 pros::MotorGroup rightDrive({rightMotor1, rightMotor2, rightMotor3});
+
+bool lowBatteryActionRequired = false;
+bool pneumaticsLow = false;
+
 
 
 void on_left_button() {
@@ -41,6 +45,40 @@ void on_right_button() {
 	}
 }
 
+void blindedByTheLights() {
+    while (true) {
+        if (lowBatteryActionRequired) {
+            ledA.set_value(0); /* On */
+            ledB.set_value(0);
+            ledC.set_value(0);
+            pros::delay(25);
+            ledA.set_value(1); /* Off */
+            ledB.set_value(1);
+            ledC.set_value(1);
+            pros::delay(25);
+        }
+        pros::delay(100); // Adjust this delay as needed
+    }
+}
+
+void checkBattery(int percent) {
+    while (true) {
+        int batteryCapacity = pros::battery::get_capacity();
+        int batteryPercentage = (batteryCapacity * 100) / 1100; // divide by mAh
+
+        if (batteryPercentage <= percent) {
+            lowBatteryActionRequired = true;
+        } else {
+            lowBatteryActionRequired = false;
+        }
+
+        pros::delay(5000);
+    }
+}
+
+
+
+
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -60,6 +98,11 @@ void initialize() {
 	ledA.set_value(1);
 	ledB.set_value(1);
 	ledC.set_value(1);
+
+	pros::Task redLEDthread(blindedByTheLights);
+	pros::Task batteryCheckThread(checkBattery, 5);
+
+
 
 }
 
