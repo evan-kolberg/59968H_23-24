@@ -16,7 +16,7 @@ pros::Motor rightMotor3(3);
 pros::MotorGroup leftDrive({leftMotor1, leftMotor2, leftMotor3});
 pros::MotorGroup rightDrive({rightMotor1, rightMotor2, rightMotor3});
 
-bool lowBatteryActionRequired = false;
+bool lowBattery = false;
 bool pneumaticsLow = false;
 
 
@@ -47,37 +47,36 @@ void on_right_button() {
 
 void blindedByTheLights() {
     while (true) {
-        if (lowBatteryActionRequired) {
+        if (lowBattery) {
             ledA.set_value(0); /* On */
             ledB.set_value(0);
             ledC.set_value(0);
-            pros::delay(25);
+            pros::delay(15);
             ledA.set_value(1); /* Off */
             ledB.set_value(1);
             ledC.set_value(1);
-            pros::delay(25);
+            pros::delay(15);
         }
-        pros::delay(100); // Adjust this delay as needed
+        pros::delay(100);
     }
 }
 
-void checkBattery(int percent) {
+void checkBattery() {
     while (true) {
+		int percentageThreshold = 10;
         int batteryCapacity = pros::battery::get_capacity();
-        int batteryPercentage = (batteryCapacity * 100) / 1100; // divide by mAh
 
-        if (batteryPercentage <= percent) {
-            lowBatteryActionRequired = true;
+        if (batteryCapacity <= percentageThreshold) {
+            lowBattery = true;
+			pros::lcd::print(0, "Battery: %d%% <= %d%%      WARNING", batteryCapacity, percentageThreshold);
         } else {
-            lowBatteryActionRequired = false;
+            lowBattery = false;
+			pros::lcd::print(0, "Battery: %d%% > %d%%", batteryCapacity, percentageThreshold);
         }
 
         pros::delay(5000);
     }
 }
-
-
-
 
 
 /**
@@ -93,14 +92,13 @@ void initialize() {
 	pros::lcd::register_btn1_cb(on_center_button);
 	pros::lcd::register_btn2_cb(on_right_button);
 
-	/* 0 is On and 1 is Off */
 	ledH.set_value(0);
 	ledA.set_value(1);
 	ledB.set_value(1);
 	ledC.set_value(1);
 
 	pros::Task redLEDthread(blindedByTheLights);
-	pros::Task batteryCheckThread(checkBattery, 5);
+	pros::Task batteryCheckThread(checkBattery);
 
 
 
@@ -153,11 +151,7 @@ void autonomous() {}
 void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-
 	while (true) {
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
 		int leftStick = master.get_analog(ANALOG_LEFT_Y);
 		int rightStick = master.get_analog(ANALOG_RIGHT_Y);
 
@@ -167,3 +161,4 @@ void opcontrol() {
 		pros::delay(20);
 	}
 }
+
