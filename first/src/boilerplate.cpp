@@ -1,55 +1,20 @@
 #include "main.h"
-	
-pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-pros::ADIDigitalOut ledA('A');
-pros::ADIDigitalOut ledB('B');
-pros::ADIDigitalOut ledC('C');
-
-pros::ADIDigitalOut solenoid('G');
-
-pros::Motor leftMotor1(11);
-pros::Motor leftMotor2(12);
-pros::Motor leftMotor3(13);
-
-pros::Motor rightMotor1(1);
-pros::Motor rightMotor2(2);
-pros::Motor rightMotor3(3);
-
-pros::MotorGroup leftDrive({leftMotor1, leftMotor2, leftMotor3});
-pros::MotorGroup rightDrive({rightMotor1, rightMotor2, rightMotor3});
-
-
-bool leftLLEMUpressed = false;
-bool centerLLEMUpressed = false;
-bool rightLLEMUpressed = false;
-
-void onLeftButton() {
+/**
+ * A callback function for LLEMU's center button.
+ *
+ * When this callback is fired, it will toggle line 2 of the LCD text between
+ * "I was pressed!" and nothing.
+ */
+void on_center_button() {
 	static bool pressed = false;
 	pressed = !pressed;
 	if (pressed) {
-		leftLLEMUpressed = true;
+		pros::lcd::set_text(2, "I was pressed!");
 	} else {
-		leftLLEMUpressed = false;
+		pros::lcd::clear_line(2);
 	}
 }
-
-
-void checkPneumatics() {
-	while (true) {
-		if (master.get_digital(DIGITAL_B) || leftLLEMUpressed) {
-			solenoid.set_value(0);
-			pros::lcd::print(1, "Pneumatics Triggered");
-			pros::delay(1000);
-		} else {
-			solenoid.set_value(1);
-		}
-
-		pros::delay(1000);
-	}
-}
-
-
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -59,11 +24,9 @@ void checkPneumatics() {
  */
 void initialize() {
 	pros::lcd::initialize();
+	pros::lcd::set_text(1, "Hello PROS User!");
 
-	pros::lcd::register_btn0_cb(onLeftButton);
-	// pros::lcd::register_btn1_cb();
-	// pros::lcd::register_btn2_cb();
-
+	pros::lcd::register_btn1_cb(on_center_button);
 }
 
 /**
@@ -111,19 +74,20 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	pros::Controller master(pros::E_CONTROLLER_MASTER);
+	pros::Motor left_mtr(1);
+	pros::Motor right_mtr(2);
+
 	while (true) {
-		pros::lcd::print(7, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
+		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
 		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
 		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
-		int leftStick = master.get_analog(ANALOG_LEFT_Y);
-		int rightStick = master.get_analog(ANALOG_RIGHT_Y);
+		int left = master.get_analog(ANALOG_LEFT_Y);
+		int right = master.get_analog(ANALOG_RIGHT_Y);
 
-		leftDrive.move(leftStick);
-		rightDrive.move(rightStick*(-1));
-
-		pros::Task checkPneumaticsThread(checkPneumatics);
+		left_mtr = left;
+		right_mtr = right;
 
 		pros::delay(20);
 	}
 }
-
