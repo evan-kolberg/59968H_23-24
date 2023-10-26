@@ -6,7 +6,7 @@ pros::ADIDigitalOut ledA('A');
 pros::ADIDigitalOut ledB('B');
 pros::ADIDigitalOut ledC('C');
 
-pros::ADIDigitalOut solenoid('G');
+pros::ADIDigitalOut solenoid('H');
 
 pros::Motor leftMotor1(11);
 pros::Motor leftMotor2(12);
@@ -20,19 +20,9 @@ pros::MotorGroup leftDrive({leftMotor1, leftMotor2, leftMotor3});
 pros::MotorGroup rightDrive({rightMotor1, rightMotor2, rightMotor3});
 
 
-bool leftLLEMUpressed = false;
-bool centerLLEMUpressed = false;
-bool rightLLEMUpressed = false;
-
-void onLeftButton() {
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed) {
-		leftLLEMUpressed = true;
-	} else {
-		leftLLEMUpressed = false;
-	}
-}
+bool leftLLEMUpressed;
+bool centerLLEMUpressed;
+bool rightLLEMUpressed;
 
 
 void checkPneumatics() {
@@ -50,71 +40,34 @@ void checkPneumatics() {
 }
 
 
-
-/**
- * Runs initialization code. This occurs as soon as the program is started.
- *
- * All other competition modes are blocked by initialize; it is recommended
- * to keep execution time for this mode under a few seconds.
- */
 void initialize() {
 	pros::lcd::initialize();
 
-	pros::lcd::register_btn0_cb(onLeftButton);
-	// pros::lcd::register_btn1_cb();
-	// pros::lcd::register_btn2_cb();
+	pros::lcd::register_btn0_cb([]{});
+	pros::lcd::register_btn1_cb([]{});
+	pros::lcd::register_btn2_cb([]{});
 
 }
 
-/**
- * Runs while the robot is in the disabled state of Field Management System or
- * the VEX Competition Switch, following either autonomous or opcontrol. When
- * the robot is enabled, this task will exit.
- */
+
 void disabled() {}
 
-/**
- * Runs after initialize(), and before autonomous when connected to the Field
- * Management System or the VEX Competition Switch. This is intended for
- * competition-specific initialization routines, such as an autonomous selector
- * on the LCD.
- *
- * This task will exit when the robot is enabled and autonomous or opcontrol
- * starts.
- */
+
 void competition_initialize() {}
 
-/**
- * Runs the user autonomous code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the autonomous
- * mode. Alternatively, this function may be called in initialize or opcontrol
- * for non-competition testing purposes.
- *
- * If the robot is disabled or communications is lost, the autonomous task
- * will be stopped. Re-enabling the robot will restart the task, not re-start it
- * from where it left off.
- */
+
 void autonomous() {}
 
-/**
- * Runs the operator control code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the operator
- * control mode.
- *
- * If no competition control is connected, this function will run immediately
- * following initialize().
- *
- * If the robot is disabled or communications is lost, the
- * operator control task will be stopped. Re-enabling the robot will restart the
- * task, not resume it from where it left off.
- */
+
 void opcontrol() {
 	while (true) {
 		pros::lcd::print(7, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
 		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
 		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
+
+		// based on the read_button() function, set the LLEMU variables above
+
+
 		int leftStick = master.get_analog(ANALOG_LEFT_Y);
 		int rightStick = master.get_analog(ANALOG_RIGHT_Y);
 
