@@ -4,9 +4,9 @@ pros::Controller master(pros::E_CONTROLLER_MASTER);
 
 pros::ADIDigitalOut solenoid('H');
 
-pros::Motor leftMotor1(11, pros::E_MOTOR_GEARSET_06);
-pros::Motor leftMotor2(12, pros::E_MOTOR_GEARSET_06);
-pros::Motor leftMotor3(13, pros::E_MOTOR_GEARSET_06);
+pros::Motor leftMotor1(11, pros::E_MOTOR_GEARSET_06, true);
+pros::Motor leftMotor2(12, pros::E_MOTOR_GEARSET_06, true);
+pros::Motor leftMotor3(13, pros::E_MOTOR_GEARSET_06, true);
 
 pros::Motor rightMotor1(1, pros::E_MOTOR_GEARSET_06);
 pros::Motor rightMotor2(2, pros::E_MOTOR_GEARSET_06);
@@ -69,6 +69,9 @@ void competition_initialize() {}
 void autonomous() {}
 
 void opcontrol() {
+	leftDrive.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
+	rightDrive.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
+
 	pros::Task checkControllerThread(checkController);
 
 	pros::lcd::register_btn0_cb([]{}); // put a callback in here
@@ -83,7 +86,7 @@ void opcontrol() {
 		int leftStick = master.get_analog(ANALOG_LEFT_Y);
 		int rightStick = master.get_analog(ANALOG_RIGHT_Y);
 
-		leftDrive.move(leftStick*(-1));
+		leftDrive.move(leftStick);
 		rightDrive.move(rightStick);
 
 		pros::delay(20);
