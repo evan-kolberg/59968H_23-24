@@ -14,12 +14,15 @@ void checkController() {
 				solenoid1.set_value(false);
 				solenoid2.set_value(false);
 				solenoidState = false;
-				pros::lcd::print(0, "air released");
+				pros::lcd::print(0, "false: air released"); // brass piston input on A, return on B
+				// when the program is off, A should be closed and B should be open
+				// reversing the A and B valvues will cause the pistons to be activated
+				// when the values are set to false AKA off
 			} else {
 				solenoid1.set_value(true);
 				solenoid2.set_value(true);
 				solenoidState = true;
-				pros::lcd::print(0, "solenoids activated");
+				pros::lcd::print(0, "true: solenoids activated");
 			}
 		}
 		pros::delay(10);
