@@ -1,87 +1,124 @@
 #include "main.h"
+#include "okapi/api.hpp"
 
-pros::Controller master(pros::E_CONTROLLER_MASTER);
+using namespace pros;
 
-pros::ADIDigitalOut solenoid('H');
+Controller master(E_CONTROLLER_MASTER);
 
-pros::Motor leftMotor1(11, pros::E_MOTOR_GEARSET_06, true);
-pros::Motor leftMotor2(12, pros::E_MOTOR_GEARSET_06, true);
-pros::Motor leftMotor3(13, pros::E_MOTOR_GEARSET_06, true);
+ADIDigitalOut solenoid('H');
 
-pros::Motor rightMotor1(1, pros::E_MOTOR_GEARSET_06);
-pros::Motor rightMotor2(2, pros::E_MOTOR_GEARSET_06);
-pros::Motor rightMotor3(3, pros::E_MOTOR_GEARSET_06);
+Motor leftMotor1(11, E_MOTOR_GEARSET_06, true);
+Motor leftMotor2(12, E_MOTOR_GEARSET_06, true);
+Motor leftMotor3(13, E_MOTOR_GEARSET_06, true);
 
-pros::MotorGroup leftDrive({leftMotor1, leftMotor2, leftMotor3});
-pros::MotorGroup rightDrive({rightMotor1, rightMotor2, rightMotor3});
+Motor rightMotor1(1, E_MOTOR_GEARSET_06);
+Motor rightMotor2(2, E_MOTOR_GEARSET_06);
+Motor rightMotor3(3, E_MOTOR_GEARSET_06);
 
-pros::Motor cata(6, pros::E_MOTOR_GEARSET_36);
-pros::Motor intake(7, pros::E_MOTOR_GEARSET_06);
+MotorGroup leftDrive({leftMotor1, leftMotor2, leftMotor3});
+MotorGroup rightDrive({rightMotor1, rightMotor2, rightMotor3});
+
+Motor cata(6, E_MOTOR_GEARSET_36);
+Motor intake(7, E_MOTOR_GEARSET_06);
 
 bool solenoidState = false;
 
 void checkController() {
 	while (true) {
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) { // intake in
+		if (master.get_digital(E_CONTROLLER_DIGITAL_R1)) { // intake in
 			intake.move_velocity(600);
-			pros::lcd::print(2, "intake in");
-		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) { // intake out
+			lcd::print(2, "intake in");
+		} else if (master.get_digital(E_CONTROLLER_DIGITAL_R2)) { // intake out
 			intake.move_velocity(-600);
-			pros::lcd::print(2, "intake out");
+			lcd::print(2, "intake out");
 		} else {
-			pros::lcd::clear_line(2);
+			lcd::clear_line(2);
 		}
 
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) { // cata
+		if (master.get_digital(E_CONTROLLER_DIGITAL_L1)) { // cata
 			cata.move_velocity(100);
-			pros::lcd::print(1, "cata moving");
+			lcd::print(1, "cata moving");
 		} else {
 			cata.move_velocity(0);
-			pros::lcd::clear_line(1);
+			lcd::clear_line(1);
 		}
 
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)) {
 			if (solenoidState) {
 				solenoid.set_value(false);
 				solenoidState = false;
-				pros::lcd::print(0, "air released");
+				lcd::print(0, "air released");
 			} else {
 				solenoid.set_value(true);
 				solenoidState = true;
-				pros::lcd::print(0, "solenoid activated");
+				lcd::print(0, "solenoid activated");
 			}
 			
 		}
 
-		pros::delay(10);
+		delay(10);
 	}
 }
 
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_background_color(LV_COLOR_AQUA);
+	lcd::initialize();
+	lcd::set_background_color(LV_COLOR_AQUA);
 }
 
 void disabled() {}
 
 void competition_initialize() {}
 
-void autonomous() {}
+void autonomous() {
+    using namespace okapi;
+
+    auto chassis = ChassisControllerBuilder()
+        .withMotors({-11, -12, -13}, {1, 2, 3})
+        .withDimensions(AbstractMotor::gearset::blue, {{(4_in * 5) / 3, 10_in, 16_in, 140_in}, imev5BlueTPR})
+        .build();
+
+    auto profileController = AsyncMotionProfileControllerBuilder()
+        .withLimits({1.0, 2.0, 10.0}) // velocity, acceleration, jerk
+        .withOutput(chassis)
+        .buildMotionProfileController();
+
+    // x, y, heading theta
+    profileController->generatePath({
+        {0_ft, 0_ft, 0_deg},
+        {3_ft, 0_ft, 0_deg},
+        {3_ft, 3_ft, 90_deg}
+    }, "first"); // def path name
+
+	profileController->generatePath({
+        {0_ft, 0_ft, 0_deg},
+        {3_ft, 0_ft, 0_deg},
+        {3_ft, 3_ft, 90_deg}
+    }, "second"); // def path name
+
+
+    profileController->setTarget("first");
+	profileController->setTarget("second");
+
+    profileController->waitUntilSettled();
+
+}
+
+
 
 void opcontrol() {
-	leftDrive.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
-	rightDrive.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
+	leftDrive.set_brake_modes(E_MOTOR_BRAKE_COAST);
+	rightDrive.set_brake_modes(E_MOTOR_BRAKE_COAST);
 
-	pros::Task checkControllerThread(checkController);
+	Task checkControllerThread(checkController);
 
-	pros::lcd::register_btn0_cb([]{}); // put a callback in here
-	pros::lcd::register_btn1_cb([]{});
-	pros::lcd::register_btn2_cb([]{});
+	lcd::register_btn0_cb([]{}); // put a callback in here
+	lcd::register_btn1_cb([]{});
+	lcd::register_btn2_cb([]{});
 
 	while (true) {
-		pros::lcd::print(7, "LLEMU: %d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
+		lcd::print(7, "LLEMU: %d %d %d", (lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
+		                 (lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
+		                 (lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
 
 		int leftStick = master.get_analog(ANALOG_LEFT_Y);
 		int rightStick = master.get_analog(ANALOG_RIGHT_Y);
@@ -89,7 +126,7 @@ void opcontrol() {
 		leftDrive.move(leftStick);
 		rightDrive.move(rightStick);
 
-		pros::delay(20);
+		delay(20);
 	}
 }
 
