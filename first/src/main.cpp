@@ -7,13 +7,13 @@ Controller master(E_CONTROLLER_MASTER);
 
 ADIDigitalOut solenoid('H');
 
-Motor leftMotor1(11, E_MOTOR_GEARSET_06, true);
-Motor leftMotor2(12, E_MOTOR_GEARSET_06, true);
-Motor leftMotor3(13, E_MOTOR_GEARSET_06, true);
+Motor rightMotor1(11, E_MOTOR_GEARSET_06);
+Motor rightMotor2(12, E_MOTOR_GEARSET_06);
+Motor rightMotor3(13, E_MOTOR_GEARSET_06);
 
-Motor rightMotor1(1, E_MOTOR_GEARSET_06);
-Motor rightMotor2(2, E_MOTOR_GEARSET_06);
-Motor rightMotor3(3, E_MOTOR_GEARSET_06);
+Motor leftMotor1(1, E_MOTOR_GEARSET_06, true);
+Motor leftMotor2(2, E_MOTOR_GEARSET_06, true);
+Motor leftMotor3(3, E_MOTOR_GEARSET_06, true);
 
 MotorGroup leftDrive({leftMotor1, leftMotor2, leftMotor3});
 MotorGroup rightDrive({rightMotor1, rightMotor2, rightMotor3});
@@ -25,17 +25,18 @@ bool solenoidState = false;
 
 void checkController() {
 	while (true) {
-		if (master.get_digital(E_CONTROLLER_DIGITAL_R1)) { // intake in
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) { // intake in
 			intake.move_velocity(600);
 			lcd::print(2, "intake in");
-		} else if (master.get_digital(E_CONTROLLER_DIGITAL_R2)) { // intake out
+		} else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_R2)) { // intake out
 			intake.move_velocity(-600);
 			lcd::print(2, "intake out");
-		} else {
+		} else if (!(master.get_digital(E_CONTROLLER_DIGITAL_R1)) && !(master.get_digital(E_CONTROLLER_DIGITAL_R2))) { // if not being pressed
+			intake.move_velocity(0);
 			lcd::clear_line(2);
 		}
 
-		if (master.get_digital(E_CONTROLLER_DIGITAL_L1)) { // cata
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) { // cata
 			cata.move_velocity(100);
 			lcd::print(1, "cata moving");
 		} else {
@@ -116,7 +117,7 @@ void opcontrol() {
 	lcd::register_btn2_cb([]{});
 
 	while (true) {
-		lcd::print(7, "LLEMU: %d %d %d", (lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
+		lcd::print(7, "%d %d %d", (lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
 		                 (lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
 		                 (lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
 
