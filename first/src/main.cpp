@@ -15,8 +15,8 @@ Motor rightMotor1(11, E_MOTOR_GEARSET_06);
 Motor rightMotor2(12, E_MOTOR_GEARSET_06);
 Motor rightMotor3(13, E_MOTOR_GEARSET_06);
 
-MotorGroup leftDrive({leftMotor1, leftMotor2, leftMotor3});
-MotorGroup rightDrive({rightMotor1, rightMotor2, rightMotor3});
+MotorGroup leftdrive({leftMotor1, leftMotor2, leftMotor3});
+MotorGroup rightdrive({rightMotor1, rightMotor2, rightMotor3});
 
 Motor cata(6, E_MOTOR_GEARSET_36);
 Motor intake(7, E_MOTOR_GEARSET_06);
@@ -52,32 +52,27 @@ void competition_initialize() {}
 void autonomous() {
     using namespace okapi;
 
-	leftDrive.set_brake_modes(E_MOTOR_BRAKE_HOLD);
-	rightDrive.set_brake_modes(E_MOTOR_BRAKE_HOLD);
+	leftdrive.set_brake_modes(E_MOTOR_BRAKE_HOLD);
+	rightdrive.set_brake_modes(E_MOTOR_BRAKE_HOLD);
 	cata.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 	intake.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 
     auto chassis = ChassisControllerBuilder()
         .withMotors({-1, -2, -3}, {11, 12, 13})
-        .withDimensions({AbstractMotor::gearset::blue, (3.0 / 5.0)}, {{3.25_in, 12.5_in}, imev5BlueTPR})
+    	.withDimensions({AbstractMotor::gearset::blue, (5 / 3)}, {{3.25_in, 12.5_in}, imev5BlueTPR})
         .build();
 
     auto profileController = AsyncMotionProfileControllerBuilder()
-        .withLimits({1.0, 2.0, 10.0}) // vel, accel, jerk
+        .withLimits({1.0, 2.0, 10.0})
         .withOutput(chassis)
         .buildMotionProfileController();
 
-    // x, y, heading theta
     profileController->generatePath({
         {0_ft, 0_ft, 0_deg},
-        {0_ft, 5_ft, 0_deg},
+        {3_ft, 0_ft, 0_deg},
     }, "first");
 
     profileController->setTarget("first");
-
-	cata.move_velocity(50);
-	pros::delay(100);
-	cata.move_velocity(0);
 
 	profileController->waitUntilSettled();
 }
@@ -85,14 +80,14 @@ void autonomous() {
 
 
 void opcontrol() {
-	leftDrive.set_brake_modes(E_MOTOR_BRAKE_COAST);
-	rightDrive.set_brake_modes(E_MOTOR_BRAKE_COAST);
-	cata.set_brake_mode(E_MOTOR_BRAKE_HOLD); // hold or coast?
+	leftdrive.set_brake_modes(E_MOTOR_BRAKE_COAST);
+	rightdrive.set_brake_modes(E_MOTOR_BRAKE_COAST);
+	cata.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 	intake.set_brake_mode(E_MOTOR_BRAKE_COAST);
 
 	Task checkControllerThread(checkController);
 
-	lcd::register_btn0_cb([]{}); // put a callback in here
+	lcd::register_btn0_cb([]{});
 	lcd::register_btn1_cb([]{});
 	lcd::register_btn2_cb([]{});
 
@@ -104,8 +99,8 @@ void opcontrol() {
 		int leftStick = master.get_analog(ANALOG_LEFT_Y);
 		int rightStick = master.get_analog(ANALOG_RIGHT_Y);
 
-		leftDrive.move(leftStick);
-		rightDrive.move(rightStick);
+		leftdrive.move(leftStick);
+		rightdrive.move(rightStick);
 
 		delay(20);
 	}
