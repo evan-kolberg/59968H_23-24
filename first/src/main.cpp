@@ -25,7 +25,7 @@ void checkController() {
     bool solstate = false;
 
     while (true) {
-        int R = master.get_digital(E_CONTROLLER_DIGITAL_R2) - master.get_digital(E_CONTROLLER_DIGITAL_R1);
+        int R = master.get_digital(E_CONTROLLER_DIGITAL_R1) - master.get_digital(E_CONTROLLER_DIGITAL_R2);
         int L = master.get_digital(E_CONTROLLER_DIGITAL_L1);
 
         intake.move_velocity(R * 600);
@@ -58,23 +58,30 @@ void autonomous() {
 	intake.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 
     auto chassis = ChassisControllerBuilder()
-        .withMotors({-1, -2, -3}, {11, 12, 13})
-    	.withDimensions({AbstractMotor::gearset::blue, (5 / 3)}, {{3.25_in, 12.5_in}, imev5BlueTPR})
+        .withMotors({1, 2, 3}, {11, 12, 13}) // 1, 2, 3 are alr reversed b/c of motor constructors
+    	.withDimensions({AbstractMotor::gearset::blue, (60 / 36)}, {{3.25_in, 12.5_in}, imev5BlueTPR})
         .build();
 
     auto profileController = AsyncMotionProfileControllerBuilder()
-        .withLimits({1.0, 2.0, 10.0})
+        .withLimits({1.0, 2.0, 10.0}) // vel, accel, jerk
         .withOutput(chassis)
         .buildMotionProfileController();
 
-    profileController->generatePath({
-        {0_ft, 0_ft, 0_deg},
-        {3_ft, 0_ft, 0_deg},
-    }, "first");
+	/*
 
-    profileController->setTarget("first");
+	// {x_unit, y_unit, headingθ_unit}
+    profileController->generatePath({ // positive x is forward, positive y is to the right ~ robot starts at 0 on unit circle
+        {1_m, 0_m, 180_deg},
+    }, "path");
 
+    profileController->setTarget("path");
 	profileController->waitUntilSettled();
+
+	*/
+
+	chassis->moveDistance(1_m);
+	chassis->turnAngle(-180_deg); // think of unit circle
+	
 }
 
 
