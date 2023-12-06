@@ -7,16 +7,16 @@ Controller master(E_CONTROLLER_MASTER);
 
 ADIDigitalOut solenoid('H');
 
-Motor leftMotor1(1, E_MOTOR_GEARSET_06, true);
-Motor leftMotor2(2, E_MOTOR_GEARSET_06, true);
-Motor leftMotor3(3, E_MOTOR_GEARSET_06, true);
+Motor leftmotor1(1, E_MOTOR_GEARSET_06, true);
+Motor leftmotor2(2, E_MOTOR_GEARSET_06, true);
+Motor leftmotor3(3, E_MOTOR_GEARSET_06, true);
 
-Motor rightMotor1(11, E_MOTOR_GEARSET_06);
-Motor rightMotor2(12, E_MOTOR_GEARSET_06);
-Motor rightMotor3(13, E_MOTOR_GEARSET_06);
+Motor rightmotor1(11, E_MOTOR_GEARSET_06);
+Motor rightmotor2(12, E_MOTOR_GEARSET_06);
+Motor rightmotor3(13, E_MOTOR_GEARSET_06);
 
-MotorGroup leftdrive({leftMotor1, leftMotor2, leftMotor3});
-MotorGroup rightdrive({rightMotor1, rightMotor2, rightMotor3});
+MotorGroup leftdrive({leftmotor1, leftmotor2, leftmotor3});
+MotorGroup rightdrive({rightmotor1, rightmotor2, rightmotor3});
 
 Motor cata(6, E_MOTOR_GEARSET_36);
 Motor intake(7, E_MOTOR_GEARSET_06);
@@ -59,20 +59,26 @@ void autonomous() {
 
     auto chassis = ChassisControllerBuilder()
         .withMotors({1, 2, 3}, {11, 12, 13}) // 1, 2, 3 are alr reversed b/c of motor constructors
+		// 5:3 gear ratio (36 input teeth, 60 output), 3.25 inch diameter wheels, 12.5 inch wheeltrack, blue motors
     	.withDimensions({AbstractMotor::gearset::blue, (60 / 36)}, {{3.25_in, 12.5_in}, imev5BlueTPR})
+		// {P, I, D}
+		.withGains(
+			{0.001, 0, 0.0001}, // distance control
+			{0.001, 0, 0.0001}  // turn control
+		)
         .build();
 
-    auto profileController = AsyncMotionProfileControllerBuilder()
+    auto profileController = AsyncMotionProfileControllerBuilder() // path planning controller
         .withLimits({1.0, 2.0, 10.0}) // vel, accel, jerk
         .withOutput(chassis)
         .buildMotionProfileController();
 
-	/*
-
 	// {x_unit, y_unit, headingθ_unit}
-    profileController->generatePath({ // positive x is forward, positive y is to the right ~ robot starts at 0 on unit circle
+    profileController->generatePath({ // positive x is forward, positive y is to the right, robot starts at 0 on unit circle
         {1_m, 0_m, 180_deg},
     }, "path");
+
+	/*
 
     profileController->setTarget("path");
 	profileController->waitUntilSettled();
@@ -82,6 +88,7 @@ void autonomous() {
 	chassis->moveDistance(1_m);
 	chassis->turnAngle(-180_deg); // think of unit circle
 	
+
 }
 
 
