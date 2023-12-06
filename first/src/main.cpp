@@ -43,6 +43,9 @@ void checkController() {
 void initialize() {
 	lcd::initialize();
 	lcd::set_background_color(LV_COLOR_SILVER);
+		
+	lcd::print(0, "");
+
 }
 
 void disabled() {}
@@ -69,26 +72,27 @@ void autonomous() {
         .build();
 
     auto profileController = AsyncMotionProfileControllerBuilder() // path planning controller
-        .withLimits({1.0, 2.0, 10.0}) // vel, accel, jerk
+        .withLimits({.5, 2.0, 10.0}) // vel m/s, accel m/s/s, jerk m/s/s/s
         .withOutput(chassis)
         .buildMotionProfileController();
 
 	// {x_unit, y_unit, headingθ_unit}
     profileController->generatePath({ // positive x is forward, positive y is to the right, robot starts at 0 on unit circle
-        {1_m, 0_m, 180_deg},
-    }, "path");
+        {0_m, 0_m, 0_deg},
+		{1_m, 1_m, 0_deg},
 
-	/*
+    }, "prog skillz");
 
-    profileController->setTarget("path");
+	/* 
+    profileController->setTarget("prog skillz");
 	profileController->waitUntilSettled();
-
 	*/
 
+	
+	chassis->setMaxVelocity(600);
 	chassis->moveDistance(1_m);
 	chassis->turnAngle(-180_deg); // think of unit circle
 	
-
 }
 
 
