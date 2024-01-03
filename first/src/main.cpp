@@ -25,11 +25,10 @@ void checkController() {
     bool solstate = false;
 
     while (true) {
-        int R = master.get_digital(E_CONTROLLER_DIGITAL_R1) - master.get_digital(E_CONTROLLER_DIGITAL_R2);
-        int L = master.get_digital(E_CONTROLLER_DIGITAL_L1);
+        int R = master.get_digital(E_CONTROLLER_DIGITAL_R2) - master.get_digital(E_CONTROLLER_DIGITAL_R1);
 
         intake.move_velocity(R * 600);
-        cata.move_velocity(L * 100);
+        cata.move_velocity(master.get_digital(E_CONTROLLER_DIGITAL_L1) * -100);
 
         if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)) {
             solenoid.set_value(solstate = !solstate);
@@ -55,44 +54,43 @@ void competition_initialize() {}
 void autonomous() {
     using namespace okapi;
 
-	leftdrive.set_brake_modes(E_MOTOR_BRAKE_HOLD);
-	rightdrive.set_brake_modes(E_MOTOR_BRAKE_HOLD);
-	cata.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-	intake.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	leftdrive.set_brake_modes(E_MOTOR_BRAKE_COAST);
+	rightdrive.set_brake_modes(E_MOTOR_BRAKE_COAST);
+	cata.set_brake_mode(E_MOTOR_BRAKE_COAST);
+	intake.set_brake_mode(E_MOTOR_BRAKE_COAST);
 
     auto chassis = ChassisControllerBuilder()
         .withMotors({1, 2, 3}, {11, 12, 13}) // 1, 2, 3 are alr reversed b/c of motor constructors
-		// 5:3 gear ratio (36 input teeth, 60 output), 3.25 inch diameter wheels, 12.5 inch wheeltrack, blue motors
-    	.withDimensions({AbstractMotor::gearset::blue, (60 / 36)}, {{3.25_in, 12.5_in}, imev5BlueTPR})
+		// 5:3 gear ratio (36 input teeth, 60 output), 3.25 inch diameter wheels, 13 inch wheeltrack, blue motors
+    	.withDimensions({AbstractMotor::gearset::blue, (60 / 36)}, {{3.25_in, 13_in}, imev5BlueTPR})
 		// {P, I, D}
 		.withGains(
-			{0.001, 0, 0.0001}, // distance control
+			{0.005, 0, 0.0005}, // distance control
 			{0.001, 0, 0.0001}  // turn control
 		)
         .build();
 
     auto profileController = AsyncMotionProfileControllerBuilder() // path planning controller
-        .withLimits({.5, 2.0, 10.0}) // vel m/s, accel m/s/s, jerk m/s/s/s
+        .withLimits({.5, 2.0, 10.0}) // vel m/s, accel m/s^2, jerk m/s^3
         .withOutput(chassis)
         .buildMotionProfileController();
 
 	// {x_unit, y_unit, headingθ_unit}
     profileController->generatePath({ // positive x is forward, positive y is to the right, robot starts at 0 on unit circle
-        {0_m, 0_m, 0_deg},
+		{0_m, 0_m, 0_deg},
 		{1_m, 1_m, 0_deg},
 
-    }, "prog skillz");
+    }, "auton");
 
 	/* 
-    profileController->setTarget("prog skillz");
+    profileController->setTarget("auton");
 	profileController->waitUntilSettled();
 	*/
-
 	
-	chassis->setMaxVelocity(600);
+	chassis->setMaxVelocity(100);
 	chassis->moveDistance(1_m);
-	chassis->turnAngle(-180_deg); // think of unit circle
-	
+	chassis->turnAngle(90_deg*2);
+
 }
 
 
