@@ -24,7 +24,7 @@ MotorGroup leftdrive({leftmotor1, leftmotor2, leftmotor3});
 MotorGroup rightdrive({rightmotor1, rightmotor2, rightmotor3});
 
 Motor cata(6, E_MOTOR_GEARSET_36);
-Motor intake(7, E_MOTOR_GEARSET_06);
+Motor intake(7, E_MOTOR_GEARSET_18);
 
 void checkController() {
     bool solstate = false;
@@ -32,7 +32,7 @@ void checkController() {
     while (true) {
         int R = master.get_digital(E_CONTROLLER_DIGITAL_R1) - master.get_digital(E_CONTROLLER_DIGITAL_R2);
 
-        intake.move_velocity(R * 600);
+        intake.move_velocity(R * 200);
         cata.move_velocity(master.get_digital(E_CONTROLLER_DIGITAL_L1) * 100);
 
         if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)) {
@@ -63,12 +63,12 @@ void inertialTurnAbsolute() { // turn using the inertial sensor
     double sensor_value = inertial.get_heading();
 
     while (true) {
-        sensor_value = inertial.get_rotation();
-        master.print(0, 0, "Rotation: %d", (int) sensor_value);
+        sensor_value = inertial.get_heading();
+        master.print(0, 0, "Heading: %d", (int) sensor_value);
         master.clear();
         double output = turnPID.getOutput(sensor_value, destination);
         leftdrive.move(output);
-        rightdrive.move(-output);
+        rightdrive.move(output);
 
         delay(20);
 	}
@@ -84,11 +84,11 @@ void autonomous() {
     auto chassis = ChassisControllerBuilder()
         .withMotors({1, 2, 3}, {11, 12, 13}) // 1, 2, 3 are alr reversed b/c of motor constructors
 		// 5:3 gear ratio (36 input teeth, 60 output), 3.25 inch diameter wheels, 14 inch wheeltrack, blue motors
-    	.withDimensions({AbstractMotor::gearset::blue, (60.0 / 36.0)}, {{3.25_in, 14_in}, imev5BlueTPR})
+    	.withDimensions({AbstractMotor::gearset::blue, (60. / 36.)}, {{3.25_in, 14_in}, imev5BlueTPR})
 		// {P, I, D}
 		.withGains(
-			{0.019, 0, 0}, // distance control
-			{0.008, 0, 0.000}  // turn control ~ for the odometry calculated chassis
+			{0.0007, 0, 0.000}, // distance control
+			{0.0019, 0, 0.000}  // turn control ~ don't use this if using the inertial sensor
 		)
         .build();
 
@@ -109,19 +109,64 @@ void autonomous() {
 	*/
 
 
-	chassis->setMaxVelocity(100);
+	chassis->setMaxVelocity(600);
 
-	chassis->moveDistance(1_m);
+	chassis->moveDistance(-0.4_m);
 
-	pros::delay(1000);
+	chassis->turnAngle(50_deg);
 
+	chassis->moveDistance(-0.3_m);
+
+	chassis->moveDistance(.3_m);
+	
+	/*
+	chassis->setMaxVelocity(600);
+
+	intake.move_velocity(200);
+
+	chassis->moveDistance(1.3_m);
+
+	intake.move_velocity(0);
+
+	chassis->turnAngle(-90_deg);
+
+	intake.move_velocity(-200);
+
+	chassis->moveDistance(.3_m);
+
+	intake.move_velocity(0);
+
+	chassis->moveDistance(-2.5_ft);
+
+	chassis->turnAngle(90_deg);
+
+	intake.move_velocity(-200);
+
+	chassis->moveDistance(.2_m);
+
+	intake.move_velocity(0);
+
+	chassis->turnAngle(-90_deg);
+
+	chassis->moveDistance(.6_m);
+
+	intake.move_velocity(200);
+
+	chassis->moveDistance(.1_m);
+
+	intake.move_velocity(0);
+	*/
+
+
+
+
+
+	/*
 	destination = 90;
 	Task turn(inertialTurnAbsolute);
-
-
-
-
-
+	pros::delay(3000);
+	turn.remove();
+	*/
 
 }
 
