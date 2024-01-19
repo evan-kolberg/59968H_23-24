@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# pros
+firmware
+include
+common.mk
+makefile
+project.pros
+src/MiniPID.cpp
