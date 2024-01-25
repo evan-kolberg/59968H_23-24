@@ -77,13 +77,18 @@ void opcontrol() {
 		                 (lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
 		                 (lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
 
-		int leftStick = master.get_analog(ANALOG_LEFT_Y);
-		int rightStick = master.get_analog(ANALOG_RIGHT_Y);
+		int forwardBackward = master.get_analog(ANALOG_LEFT_Y); // Forward and backward control
+		int leftRight = master.get_analog(ANALOG_RIGHT_X); // Left and right control
 
-		leftdrive.move(leftStick);
-		rightdrive.move(rightStick);
+		// Arcade control calculations
+		int leftMotorSpeed = forwardBackward - leftRight;
+		int rightMotorSpeed = forwardBackward + leftRight;
+
+		leftdrive.move(leftMotorSpeed);
+		rightdrive.move(rightMotorSpeed);
 
 		delay(20);
+
 	}
 }
 
