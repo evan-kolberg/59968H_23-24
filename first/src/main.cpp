@@ -1,4 +1,5 @@
 #include "main.h"
+#include <string>
 #include "okapi/api.hpp"
 #include "MiniPID.h"
 
@@ -6,21 +7,23 @@ using namespace pros;
 
 Controller master(E_CONTROLLER_MASTER);
 
-ADIDigitalOut solenoid('H');
+ADIDigitalOut wings1('H');
+ADIDigitalOut wings2('E');
+ADIDigitalOut elevation1('G');
+ADIDigitalOut elevation2('F');
+
 ADIDigitalIn limitSwitchTriball('A');
-ADIDigitalIn limitSwitchCata('B');
+ADIDigitalIn limitSwitchCata('C');
 
 Imu inertial(8);
 
-double destination = 0;
+Motor leftmotor1(11, E_MOTOR_GEARSET_06, true);
+Motor leftmotor2(12, E_MOTOR_GEARSET_06, true);
+Motor leftmotor3(13, E_MOTOR_GEARSET_06, true);
 
-Motor leftmotor1(1, E_MOTOR_GEARSET_06, true);
-Motor leftmotor2(2, E_MOTOR_GEARSET_06, true);
-Motor leftmotor3(3, E_MOTOR_GEARSET_06, true);
-
-Motor rightmotor1(11, E_MOTOR_GEARSET_06);
-Motor rightmotor2(12, E_MOTOR_GEARSET_06);
-Motor rightmotor3(13, E_MOTOR_GEARSET_06);
+Motor rightmotor1(1, E_MOTOR_GEARSET_06);
+Motor rightmotor2(1, E_MOTOR_GEARSET_06);
+Motor rightmotor3(3, E_MOTOR_GEARSET_06);
 
 MotorGroup leftdrive({leftmotor1, leftmotor2, leftmotor3});
 MotorGroup rightdrive({rightmotor1, rightmotor2, rightmotor3});
@@ -30,7 +33,8 @@ Motor intake(7, E_MOTOR_GEARSET_18);
 
 void checkController()
 {
-	bool solstate = false;
+	bool wstate = false;
+	bool elstate = false;
 
 	while (true)
 	{
@@ -40,8 +44,16 @@ void checkController()
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B))
 		{
-			solenoid.set_value(solstate = !solstate);
-			lcd::print(0, solstate ? "true: solenoid activated" : "false: air released");
+			bool new_wstate = (wstate = !wstate);
+			wings1.set_value(new_wstate);
+			wings2.set_value(new_wstate);
+		}
+
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y))
+		{
+			bool new_elstate = (elstate = !elstate);
+			elevation1.set_value(new_elstate);
+			elevation2.set_value(new_elstate);
 		}
 
 		pros::delay(10);
@@ -57,41 +69,46 @@ void cataProcess()
 			cata.move_velocity(0);
 			if (limitSwitchTriball.get_value())
 			{
-				cata.move_velocity(100);
+				cata.move_velocity(-100);
 				pros::delay(250);
 			}
 		}
 		else
 		{
-			cata.move_velocity(100);
+			cata.move_velocity(-100);
 		}
 
 		pros::delay(20);
 	}
 }
 
+std::string selectedAuton = "";
+
 void initialize()
 {
 	lcd::initialize();
-	lcd::set_background_color(LV_COLOR_SILVER);
+	lcd::set_background_color(LV_COLOR_RED);
 
-	lcd::print(0, "");
+	lcd::register_btn0_cb([] {
+        lcd::set_text(2, "Selected close side auton");
+        selectedAuton = 'close';
+    });
+
+    lcd::register_btn1_cb([] {
+        lcd::set_text(2, "Selected far side auton");
+        selectedAuton = 'far';
+    });
 }
 
 void disabled() {}
 
 void competition_initialize() {}
 
-struct turnPIDValues
-{
-	double p;
-	double i;
-	double d;
-};
+double destination = 0;
 
-void turn_to_abs(double destination, turnPIDValues pidValues)
+void turn_to_abs(void *)
 {
-	MiniPID turnPID = MiniPID(pidValues.p, pidValues.i, pidValues.d);
+	MiniPID turnPID = MiniPID(1.3, 0, 0.7);
 
 	double sensor_value = inertial.get_rotation();
 
@@ -104,7 +121,7 @@ void turn_to_abs(double destination, turnPIDValues pidValues)
 		leftdrive.move(output);
 		rightdrive.move(-output);
 
-		pros::delay(20);
+		delay(20);
 	}
 }
 
@@ -112,11 +129,9 @@ void autonomous()
 {
 	using namespace okapi;
 
-	double destination = 0;
-
 	leftdrive.set_brake_modes(E_MOTOR_BRAKE_BRAKE);
 	rightdrive.set_brake_modes(E_MOTOR_BRAKE_BRAKE);
-	intake.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	intake.set_brake_mode(E_MOTOR_BRAKE_COAST);
 
 	auto chassis = ChassisControllerBuilder()
 					   .withMotors({1, 2, 3}, {11, 12, 13}) // 1, 2, 3 are alr reversed b/c of motor constructors
@@ -124,33 +139,25 @@ void autonomous()
 					   .withDimensions({AbstractMotor::gearset::blue, (60. / 36.)}, {{3.25_in, 14_in}, imev5BlueTPR})
 					   // {P, I, D}
 					   .withGains(
-						   {0.0007, 0, 0.000}, // distance control
-						   {0, 0, 0}		   // turn control ~ don't use this if using the inertial sensor
+						   {0.002, 0, 0.000005}, // distance control
+						   {0, 0, 0}			 // turn control ~ don't use this if using the inertial sensor
 						   )
 					   .build();
 
-	chassis->setMaxVelocity(600);
+	// can't do a negative distance to reverse without fucking up the auton, everything stalls
+	// use eztemplate and lemlib because c2c team uses that
 
-	chassis->moveDistance(0.5_m);
-
-	turnPIDValues pidValues = {0.86, 0, 0.6284};
-
-	turn_to_abs(90, pidValues);
 }
 
 void opcontrol()
 {
 	leftdrive.set_brake_modes(E_MOTOR_BRAKE_COAST);
 	rightdrive.set_brake_modes(E_MOTOR_BRAKE_COAST);
-	cata.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	cata.set_brake_mode(E_MOTOR_BRAKE_COAST);
 	intake.set_brake_mode(E_MOTOR_BRAKE_COAST);
 
 	Task checkControllerThread(checkController);
 	Task cataProcessThread(cataProcess);
-
-	lcd::register_btn0_cb([] {});
-	lcd::register_btn1_cb([] {});
-	lcd::register_btn2_cb([] {});
 
 	while (true)
 	{
@@ -167,4 +174,3 @@ void opcontrol()
 		pros::delay(20);
 	}
 }
-
