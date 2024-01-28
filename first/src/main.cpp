@@ -147,6 +147,14 @@ void autonomous()
 	// can't do a negative distance to reverse without fucking up the auton, everything stalls
 	// use eztemplate and lemlib because c2c team uses that
 
+
+	intake.move_velocity(200);
+	chassis->moveDistance(1.1_m);
+	intake.move_velocity(0);
+
+
+
+
 }
 
 void opcontrol()
