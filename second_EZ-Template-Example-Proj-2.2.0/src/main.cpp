@@ -5,28 +5,28 @@
 Drive chassis (
   // Left Chassis Ports (negative port will reverse it!)
   //   the first port is the sensored port (when trackers are not used!)
-  {-15, -16}
+  {-11, -12, -13}
 
   // Right Chassis Ports (negative port will reverse it!)
   //   the first port is the sensored port (when trackers are not used!)
-  ,{6, 5}
+  ,{1, 2, 3}
 
   // IMU Port
-  ,20
+  ,8
 
   // Wheel Diameter (Remember, 4" wheels are actually 4.125!)
   //    (or tracking wheel diameter)
-  ,2.5
+  ,3.25
 
   // Cartridge RPM
   //   (or tick per rotation if using tracking wheels)
-  ,1200
+  ,600
 
   // External Gear Ratio (MUST BE DECIMAL)
   //    (or gear ratio of tracking wheel)
   // eg. if your drive is 84:36 where the 36t is powered, your RATIO would be 2.333.
   // eg. if your drive is 36:60 where the 60t is powered, your RATIO would be 0.6.
-  ,2
+  ,(5/3)
 
 
   // Uncomment if using tracking wheels
@@ -45,6 +45,38 @@ Drive chassis (
   // ,1
 );
 
+pros::Motor cata(6, pros::E_MOTOR_GEARSET_36);
+pros::Motor intake(7, pros::E_MOTOR_GEARSET_18);
+
+pros::ADIDigitalOut wings_sol_1('H');
+pros::ADIDigitalOut wings_sol_2('E');
+pros::ADIDigitalOut elevation_sol_1('G');
+pros::ADIDigitalOut elevation_sol_2('F');
+
+pros::ADIDigitalIn limit_switch_basket('A');
+pros::ADIDigitalIn limit_switch_cata('C');
+
+void cata_process()
+{
+	while (true)
+	{
+		if (limit_switch_cata.get_value())
+		{
+			cata.move_velocity(0);
+			if (limit_switch_basket.get_value())
+			{
+				cata.move_velocity(-100);
+				pros::delay(250);
+			}
+		}
+		else
+		{
+			cata.move_velocity(-100);
+		}
+
+		pros::delay(20);
+	}
+}
 
 
 /**
@@ -152,6 +184,11 @@ void opcontrol() {
   // This is preference to what you like to drive on.
   chassis.set_drive_brake(MOTOR_BRAKE_COAST);
 
+  pros::Task cata_thread(cata_process);
+
+  bool wings_state = false;
+	bool elevation_state = false;
+
   while (true) {
 
     chassis.tank(); // Tank control
@@ -160,9 +197,23 @@ void opcontrol() {
     // chassis.arcade_flipped(ez::SPLIT); // Flipped split arcade
     // chassis.arcade_flipped(ez::SINGLE); // Flipped single arcade
 
-    // . . .
-    // Put more user control code here!
-    // . . .
+    int R = master.get_digital(pros::E_CONTROLLER_DIGITAL_R1) - master.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
+
+		intake.move_velocity(R * 200);
+
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B))
+		{
+			bool new_wstate = (wings_state = !wings_state);
+			wings_sol_1.set_value(new_wstate);
+			wings_sol_2.set_value(new_wstate);
+		}
+
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y))
+		{
+			bool new_elstate = (elevation_state = !elevation_state);
+			elevation_sol_1.set_value(new_elstate);
+			elevation_sol_2.set_value(new_elstate);
+		}
 
     pros::delay(ez::util::DELAY_TIME); // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
   }
