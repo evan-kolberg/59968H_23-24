@@ -1,10 +1,5 @@
 #include "main.h"
-
-/////
-// For installation, upgrading, documentations and tutorials, check out our website!
-// https://ez-robotics.github.io/EZ-Template/
-/////
-
+#include "lemlib/api.hpp"
 
 // Chassis constructor
 ez::Drive chassis (
@@ -26,9 +21,6 @@ ez::Drive chassis (
   ,600
 
   // External Gear Ratio (MUST BE DECIMAL) This is WHEEL GEAR / MOTOR GEAR
-  // eg. if your drive is 84:36 where the 36t is powered, your RATIO would be 84/36 which is 2.333
-  // eg. if your drive is 60:36 where the 36t is powered, your RATIO would be 60/36 which is 1.6667
-  // eg. if your drive is 36:60 where the 60t is powered, your RATIO would be 36/60 which is 0.6
   ,(60. / 36.)
 );
 
@@ -90,6 +82,9 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
+    // Auton("Far Side", far_side),
+    // Auton("Close Side", close_side),
+    // Auton("Skillz", skillz),
     Auton("Example Drive\n\nDrive forward and come back.", drive_example),
     Auton("Example Turn\n\nTurn 3 times.", turn_example),
     Auton("Drive and Turn\n\nDrive forward, turn, come back. ", drive_and_turn),
@@ -186,11 +181,11 @@ void opcontrol() {
       //  When enabled: 
       //  * use A and Y to increment / decrement the constants
       //  * use the arrow keys to navigate the constants
-      if (master.get_digital_new_press(DIGITAL_X)) 
+      if (master.get_digital_new_press(DIGITAL_L2)) 
         chassis.pid_tuner_toggle();
         
       // Trigger the selected autonomous routine
-      if (master.get_digital_new_press(DIGITAL_B)) 
+      if (master.get_digital_new_press(DIGITAL_L1)) 
         autonomous();
 
       chassis.pid_tuner_iterate(); // Allow PID Tuner to iterate
@@ -213,7 +208,7 @@ void opcontrol() {
 			wings_sol_2.set_value(new_wstate);
 		}
 
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y))
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X))
 		{
 			bool new_elstate = (elevation_state = !elevation_state);
 			elevation_sol_1.set_value(new_elstate);

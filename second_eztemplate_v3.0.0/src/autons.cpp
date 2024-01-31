@@ -1,10 +1,5 @@
 #include "main.h"
 
-/////
-// For installation, upgrading, documentations and tutorials, check out our website!
-// https://ez-robotics.github.io/EZ-Template/
-/////
-
 // These are out of 127
 const int DRIVE_SPEED = 110;  
 const int TURN_SPEED = 90;
