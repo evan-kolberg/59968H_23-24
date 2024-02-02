@@ -1,27 +1,13 @@
 #include "main.h"
-#include "lemlib/api.hpp"
 
 // Chassis constructor
 ez::Drive chassis (
-  // Left Chassis Ports (negative port will reverse it!)
-  //   the first port is used as the sensor
-  {-11, -12, -13}
-
-  // Right Chassis Ports (negative port will reverse it!)
-  //   the first port is used as the sensor
-  ,{1, 2, 3}
-
-  // IMU Port
-  ,8
-
-  // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
-  ,3.25
-
-  // Cartridge RPM
-  ,600
-
-  // External Gear Ratio (MUST BE DECIMAL) This is WHEEL GEAR / MOTOR GEAR
-  ,(60. / 36.)
+  {-11, -12, -13},
+  {1, 2, 3},
+  8,
+  3.25,
+  600,
+  (60. / 36.)
 );
 
 pros::Motor cata(6, pros::E_MOTOR_GEARSET_36);
@@ -72,19 +58,15 @@ void initialize() {
 
   // Configure your chassis controls
   chassis.opcontrol_curve_buttons_toggle(true); // Enables modifying the controller curve with buttons on the joysticks
-  chassis.opcontrol_drive_activebrake_set(0); // Sets the active brake kP. We recommend 0.1.
+  chassis.opcontrol_drive_activebrake_set(0.1); // Sets the active brake kP. We recommend 0.1.
   chassis.opcontrol_curve_default_set(0, 0); // Defaults for curve. If using tank, only the first parameter is used. (Comment this line out if you have an SD card!)  
   default_constants(); // Set the drive to your own constants from autons.cpp!
 
-  // These are already defaulted to these buttons, but you can change the left/right curve buttons here!
-  // chassis.opcontrol_curve_buttons_left_set (pros::E_CONTROLLER_DIGITAL_LEFT, pros::E_CONTROLLER_DIGITAL_RIGHT); // If using tank, only the left side is used. 
-  // chassis.opcontrol_curve_buttons_right_set(pros::E_CONTROLLER_DIGITAL_Y,    pros::E_CONTROLLER_DIGITAL_A);
-
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
-    // Auton("Far Side", far_side),
-    // Auton("Close Side", close_side),
-    // Auton("Skillz", skillz),
+    Auton("Far Side\n\nye know it does some stuff", far_side),
+    Auton("Close Side\n\nye more stuff", close_side),
+    Auton("Skillz\n\nfrog skillz", skillz),
     Auton("Example Drive\n\nDrive forward and come back.", drive_example),
     Auton("Example Turn\n\nTurn 3 times.", turn_example),
     Auton("Drive and Turn\n\nDrive forward, turn, come back. ", drive_and_turn),
@@ -181,12 +163,14 @@ void opcontrol() {
       //  When enabled: 
       //  * use A and Y to increment / decrement the constants
       //  * use the arrow keys to navigate the constants
-      if (master.get_digital_new_press(DIGITAL_L2)) 
+      if (master.get_digital_new_press(DIGITAL_L1)) 
         chassis.pid_tuner_toggle();
         
       // Trigger the selected autonomous routine
-      if (master.get_digital_new_press(DIGITAL_L1)) 
+      if (master.get_digital_new_press(DIGITAL_L2)) 
         autonomous();
+        chassis.drive_brake_set(MOTOR_BRAKE_COAST);
+
 
       chassis.pid_tuner_iterate(); // Allow PID Tuner to iterate
     } 
