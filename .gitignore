@@ -33,8 +33,10 @@
 
 # pros
 firmware
-include
 common.mk
 makefile
 project.pros
 src/MiniPID.cpp
+
+# retired code that got us to states (but it sucks)
+first
