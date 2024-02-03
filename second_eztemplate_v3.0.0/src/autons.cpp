@@ -1,14 +1,15 @@
 #include "main.h"
 
 // These are out of 127
-const int DRIVE_SPEED = 110;  
+const int DRIVE_SPEED = 110;
 const int TURN_SPEED = 90;
 const int SWING_SPEED = 90;
 
 ///
 // Constants
 ///
-void default_constants() {
+void default_constants()
+{
   chassis.pid_heading_constants_set(3, 0, 20);
   chassis.pid_drive_constants_set(10, 0, 100);
   chassis.pid_turn_constants_set(3, 0, 20);
@@ -21,29 +22,29 @@ void default_constants() {
   chassis.slew_drive_constants_set(7_in, 80);
 }
 
-
-void far_side() {
+void far_side()
+{
   chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
   chassis.pid_wait();
   chassis.pid_turn_set(90_deg, TURN_SPEED);
   chassis.pid_wait();
 }
 
-void close_side() {
-
+void close_side()
+{
 }
 
-void skillz() {
-
+void skillz()
+{
+  pros::Task cata_thread(cata_process);
+  pros::delay(50000);
 }
-
-
-
 
 ///
 // Drive Example
 ///
-void drive_example() {
+void drive_example()
+{
   // The first parameter is target inches
   // The second parameter is max speed the robot will drive at
   // The third parameter is a boolean (true or false) for enabling/disabling a slew at the start of drive motions
@@ -62,7 +63,8 @@ void drive_example() {
 ///
 // Turn Example
 ///
-void turn_example() {
+void turn_example()
+{
   // The first parameter is target degrees
   // The second parameter is max speed the robot will drive at
 
@@ -79,7 +81,8 @@ void turn_example() {
 ///
 // Combining Turn + Drive
 ///
-void drive_and_turn() {
+void drive_and_turn()
+{
   chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
   chassis.pid_wait();
 
@@ -99,13 +102,14 @@ void drive_and_turn() {
 ///
 // Wait Until and Changing Max Speed
 ///
-void wait_until_change_speed() {
+void wait_until_change_speed()
+{
   // pid_wait_until will wait until the robot gets to a desired position
 
   // When the robot gets to 6 inches, the robot will travel the remaining distance at a max speed of 30
   chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
   chassis.pid_wait_until(6_in);
-  chassis.pid_speed_max_set(30);  // After driving 6 inches at DRIVE_SPEED, the robot will go the remaining distance at 30 speed
+  chassis.pid_speed_max_set(30); // After driving 6 inches at DRIVE_SPEED, the robot will go the remaining distance at 30 speed
   chassis.pid_wait();
 
   chassis.pid_turn_set(45_deg, TURN_SPEED);
@@ -120,14 +124,15 @@ void wait_until_change_speed() {
   // When the robot gets to -6 inches, the robot will travel the remaining distance at a max speed of 30
   chassis.pid_drive_set(-24_in, DRIVE_SPEED, true);
   chassis.pid_wait_until(-6_in);
-  chassis.pid_speed_max_set(30);  // After driving 6 inches at DRIVE_SPEED, the robot will go the remaining distance at 30 speed
+  chassis.pid_speed_max_set(30); // After driving 6 inches at DRIVE_SPEED, the robot will go the remaining distance at 30 speed
   chassis.pid_wait();
 }
 
 ///
 // Swing Example
 ///
-void swing_example() {
+void swing_example()
+{
   // The first parameter is ez::LEFT_SWING or ez::RIGHT_SWING
   // The second parameter is target degrees
   // The third parameter is speed of the moving side of the drive
@@ -149,7 +154,8 @@ void swing_example() {
 ///
 // Auto that tests everything
 ///
-void combining_movements() {
+void combining_movements()
+{
   chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
   chassis.pid_wait();
 
@@ -169,21 +175,25 @@ void combining_movements() {
 ///
 // Interference example
 ///
-void tug(int attempts) {
-  for (int i = 0; i < attempts - 1; i++) {
+void tug(int attempts)
+{
+  for (int i = 0; i < attempts - 1; i++)
+  {
     // Attempt to drive backwards
     printf("i - %i", i);
     chassis.pid_drive_set(-12_in, 127);
     chassis.pid_wait();
 
     // If failsafed...
-    if (chassis.interfered) {
+    if (chassis.interfered)
+    {
       chassis.drive_sensor_reset();
       chassis.pid_drive_set(-2_in, 20);
       pros::delay(1000);
     }
     // If robot successfully drove back, return
-    else {
+    else
+    {
       return;
     }
   }
@@ -191,11 +201,13 @@ void tug(int attempts) {
 
 // If there is no interference, robot will drive forward and turn 90 degrees.
 // If interfered, robot will drive forward and then attempt to drive backwards.
-void interfered_example() {
+void interfered_example()
+{
   chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
   chassis.pid_wait();
 
-  if (chassis.interfered) {
+  if (chassis.interfered)
+  {
     tug(3);
     return;
   }
@@ -203,7 +215,3 @@ void interfered_example() {
   chassis.pid_turn_set(90_deg, TURN_SPEED);
   chassis.pid_wait();
 }
-
-// . . .
-// Make your own autonomous functions here!
-// . . .
