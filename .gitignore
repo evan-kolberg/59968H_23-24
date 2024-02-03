@@ -36,7 +36,19 @@ firmware
 common.mk
 makefile
 project.pros
-src/MiniPID.cpp
+compile_commands.json
+bin
 
-# retired code that got us to states (but it sucks)
+# include folder things that aren't special
+display
+EZ-template
+fmt
+lemlib
+okapi
+pros
+api.h
+main.h
+
+
+# retired code that got us tournament finalist (but it sucks)
 first
