@@ -1,21 +1,42 @@
-# retired code that got us tournament finalist (but it sucks)
-first
+# Prerequisites
+*.d
 
-# nonunique c++, pros, and library things
-.d
-.vscode
-bin
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# pros
 firmware
-display
-EZ-template
-fmt
-lemlib
-okapi
-pros
-api.h
-main.h
 common.mk
-compile_commands.json
 makefile
 project.pros
+src/MiniPID.cpp
 
+# retired code that got us to states (but it sucks)
+first
