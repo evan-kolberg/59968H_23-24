@@ -1,0 +1,32 @@
+# retired code that got us tournament finalist (but it sucks)
+
+
+# nonunique c++, pros, and library things
+.d
+.vscode
+bin
+firmware
+display
+EZ-template
+fmt
+lemlib
+okapi
+pros
+api.h
+main.h
+common.mk
+compile_commands.json
+makefile
+project.pros
+
+bin/
+.vscode/
+.cache/
+compile_commands.json
+temp.log
+temp.errors
+*.ini
+.d/
+
+EZ-Template@3.0.0.zip
+LemLib@0.5.0-rc.5.zip
