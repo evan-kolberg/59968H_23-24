@@ -30,11 +30,11 @@
             "-funwind-tables",
             "--std=gnu++17",
             "-o",
-            "bin/autons.cpp.o",
-            "src/autons.cpp"
+            "bin/main.cpp.o",
+            "src/main.cpp"
         ],
         "directory": "/Users/evankolberg/Programming_Projects/59968H_23-24/second_eztemplate_v3.0.0",
-        "file": "src/autons.cpp"
+        "file": "src/main.cpp"
     },
     {
         "arguments": [
@@ -67,10 +67,10 @@
             "-funwind-tables",
             "--std=gnu++17",
             "-o",
-            "bin/main.cpp.o",
-            "src/main.cpp"
+            "bin/autons.cpp.o",
+            "src/autons.cpp"
         ],
         "directory": "/Users/evankolberg/Programming_Projects/59968H_23-24/second_eztemplate_v3.0.0",
-        "file": "src/main.cpp"
+        "file": "src/autons.cpp"
     }
 ]

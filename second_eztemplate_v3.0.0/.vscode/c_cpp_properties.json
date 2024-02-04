@@ -1,32 +1,32 @@
 {
-    "configurations": [
-      {
-        "name": "PROS Project",
-        "includePath": [
-          "${workspaceFolder}/**",
-          "/Users/evankolberg/Programming_Projects/59968H_23-24/second_eztemplate_v3.0.0/include"
+  "configurations": [
+    {
+      "name": "PROS Project",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "/Users/evankolberg/Programming_Projects/59968H_23-24/second_eztemplate_v3.0.0/include"
+      ],
+      "defines": [
+        "_DEBUG",
+        "UNICODE",
+        "_UNICODE"
+      ],
+      "compilerPath": "/Users/evankolberg/Library/Application Support/Code/User/globalStorage/sigbots.pros/install/pros-toolchain-macos/bin/arm-none-eabi-g++",
+      "cStandard": "gnu11",
+      "cppStandard": "gnu++20",
+      "intelliSenseMode": "gcc-arm",
+      "compileCommands": "/Users/evankolberg/Programming_Projects/59968H_23-24/second_eztemplate_v3.0.0/compile_commands.json",
+      "macFrameworkPath": [
+        "/System/Library/Frameworks"
+      ],
+      "browse": {
+        "path": [
+          "/Users/evankolberg/Programming_Projects/59968H_23-24/second_eztemplate_v3.0.0"
         ],
-        "defines": [
-          "_DEBUG",
-          "UNICODE",
-          "_UNICODE"
-        ],
-        "compilerPath": "/Users/evankolberg/Library/Application Support/Code/User/globalStorage/sigbots.pros/install/pros-toolchain-macos/bin/arm-none-eabi-g++",
-        "cStandard": "gnu11",
-        "cppStandard": "gnu++20",
-        "intelliSenseMode": "gcc-arm",
-        "compileCommands": "/Users/evankolberg/Programming_Projects/59968H_23-24/second_eztemplate_v3.0.0/compile_commands.json",
-        "macFrameworkPath": [
-          "/System/Library/Frameworks"
-        ],
-        "browse": {
-          "path": [
-            "/Users/evankolberg/Programming_Projects/59968H_23-24/second_eztemplate_v3.0.0"
-          ],
-          "limitSymbolsToIncludedHeaders": true,
-          "databaseFilename": ""
-        }
+        "limitSymbolsToIncludedHeaders": true,
+        "databaseFilename": ""
       }
-    ],
-    "version": 4
-  }
+    }
+  ],
+  "version": 4
+}
