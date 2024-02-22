@@ -15,6 +15,5 @@ void default_constants();
 
 void far_side();
 void close_side();
-void skillz();
-void cata_process();
+void skills();
 

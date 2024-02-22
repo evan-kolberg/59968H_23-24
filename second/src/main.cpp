@@ -1,46 +1,19 @@
 #include "main.h"
 
 // Chassis constructor
-ez::Drive chassis(
-    {-11, -12, -13},
-    {1, 2, 3},
-    8,
-    3.25,
-    600,
-    (60. / 36.));
+ez::Drive chassis({-11, -12, -13}, {1, 2, 3}, 8, 3.25, 600, (60. / 36.));
 
-pros::Motor cata(6, pros::E_MOTOR_GEARSET_36);
+pros::Motor cata(20, pros::E_MOTOR_GEARSET_36);
 pros::Motor intake(7, pros::E_MOTOR_GEARSET_18);
 
-ez::Piston wings_solenoid_1('H');
-ez::Piston wings_solenoid_2('E');
-ez::Piston elevation_solenoid_1('G');
-ez::Piston elevation_solenoid_2('F');
+ez::Piston front_left_wing('A', false);  // dual action, 1 piston
+ez::Piston front_right_wing('B', false); // dual action, 1 piston
 
-pros::ADIDigitalIn limit_switch_basket('A');
-pros::ADIDigitalIn limit_switch_cata('C');
+ez::Piston back_left_wing('C', false);  // single action, 1 piston
+ez::Piston back_right_wing('D', false); // single action, 1 piston
 
-void cata_process()
-{
-  while (true)
-  {
-    if (limit_switch_cata.get_value())
-    {
-      cata.move_velocity(0);
-      if (limit_switch_basket.get_value())
-      {
-        cata.move_velocity(-100);
-        pros::delay(250);
-      }
-    }
-    else
-    {
-      cata.move_velocity(-100);
-    }
-
-    pros::delay(20);
-  }
-}
+ez::Piston elevation_1('E', false); // dual action, 2 pistons
+ez::Piston elevation_2('F', false); // dual action, 2 pistons
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -63,16 +36,16 @@ void initialize()
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
-      Auton("Far Side\n\nya know it does some stuff", far_side),
-      Auton("Close Side\n\nya more stuff", close_side),
-      Auton("Skillz\n\nprog skillz", skillz),
-      Auton("Example Drive\n\nDrive forward and come back.", drive_example),
-      Auton("Example Turn\n\nTurn 3 times.", turn_example),
-      Auton("Drive and Turn\n\nDrive forward, turn, come back. ", drive_and_turn),
-      Auton("Drive and Turn\n\nSlow down during drive.", wait_until_change_speed),
-      Auton("Swing Example\n\nSwing in an 'S' curve", swing_example),
-      Auton("Combine all 3 movements", combining_movements),
-      Auton("Interference\n\nAfter driving forward, robot performs differently if interfered or not.", interfered_example),
+      Auton("\nFar Side", far_side),
+      Auton("\nClose Side", close_side),
+      Auton("\nSkills", skills),
+      Auton("\nExample Drive\n\nDrive forward and come back.", drive_example),
+      Auton("\nExample Turn\n\nTurn 3 times.", turn_example),
+      Auton("\nDrive and Turn\n\nDrive forward, turn, come back. ", drive_and_turn),
+      Auton("\nDrive and Turn\n\nSlow down during drive.", wait_until_change_speed),
+      Auton("\nSwing Example\n\nSwing in an 'S' curve", swing_example),
+      Auton("\nCombine all 3 movements", combining_movements),
+      Auton("\nInterference\n\nAfter driving forward, robot performs differently if interfered or not.", interfered_example),
   });
 
   // Initialize chassis and auton selector
@@ -144,7 +117,7 @@ void opcontrol()
   // This is preference to what you like to drive on
   chassis.drive_brake_set(MOTOR_BRAKE_COAST);
 
-  pros::Task cata_thread(cata_process);
+  bool cata_state = false;
 
   while (true)
   {
@@ -157,11 +130,11 @@ void opcontrol()
       //  When enabled:
       //  * use A and Y to increment / decrement the constants
       //  * use the arrow keys to navigate the constants
-      if (master.get_digital_new_press(DIGITAL_L1))
+      if (master.get_digital_new_press(DIGITAL_UP))
         chassis.pid_tuner_toggle();
 
       // Trigger the selected autonomous routine
-      if (master.get_digital_new_press(DIGITAL_L2))
+      if (master.get_digital_new_press(DIGITAL_DOWN))
         autonomous();
       chassis.drive_brake_set(MOTOR_BRAKE_COAST); // back to normal after auton
 
@@ -173,11 +146,20 @@ void opcontrol()
     int R = master.get_digital(pros::E_CONTROLLER_DIGITAL_R1) - master.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
     intake.move_velocity(R * 200);
 
-    wings_solenoid_1.button_toggle(master.get_digital(DIGITAL_B));
-    wings_solenoid_2.button_toggle(master.get_digital(DIGITAL_B));
+    if (master.get_digital_new_press(DIGITAL_B))
+    {
+      cata_state = !cata_state;
+      cata.move_velocity(cata_state ? 100 : 0);
+    }
 
-    elevation_solenoid_1.button_toggle(master.get_digital(DIGITAL_X));
-    elevation_solenoid_2.button_toggle(master.get_digital(DIGITAL_X));
+    front_left_wing.button_toggle(master.get_digital(DIGITAL_L2));
+    front_right_wing.button_toggle(master.get_digital(DIGITAL_L2));
+
+    back_left_wing.button_toggle(master.get_digital(DIGITAL_L1));
+    back_right_wing.button_toggle(master.get_digital(DIGITAL_L1));
+
+    elevation_1.button_toggle(master.get_digital(DIGITAL_Y));
+    elevation_2.button_toggle(master.get_digital(DIGITAL_Y));
 
     pros::delay(ez::util::DELAY_TIME); // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
   }

@@ -34,9 +34,8 @@ void close_side()
 {
 }
 
-void skillz()
+void skills()
 {
-  pros::Task cata_thread(cata_process);
   pros::delay(50000);
 }
 
