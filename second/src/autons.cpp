@@ -1,7 +1,7 @@
 #include "main.h"
 
 // These are out of 127
-const int DRIVE_SPEED = 110;
+const int DRIVE_SPEED = 120;
 const int TURN_SPEED = 90;
 const int SWING_SPEED = 90;
 
@@ -11,23 +11,86 @@ const int SWING_SPEED = 90;
 void default_constants()
 {
   chassis.pid_heading_constants_set(3, 0, 20);
-  chassis.pid_drive_constants_set(10, 0, 100);
+  chassis.pid_drive_constants_set(10, 0, 80);
   chassis.pid_turn_constants_set(3, 0, 20);
   chassis.pid_swing_constants_set(5, 0, 30);
 
-  chassis.pid_turn_exit_condition_set(300_ms, 3_deg, 500_ms, 7_deg, 750_ms, 750_ms);
-  chassis.pid_swing_exit_condition_set(300_ms, 3_deg, 500_ms, 7_deg, 750_ms, 750_ms);
-  chassis.pid_drive_exit_condition_set(300_ms, 1_in, 500_ms, 3_in, 750_ms, 750_ms);
+  chassis.pid_turn_exit_condition_set(50_ms, 1_deg, 80_ms, 3_deg, 500_ms, 500_ms);
+  chassis.pid_swing_exit_condition_set(50_ms, 1_deg, 80_ms, 3_deg, 500_ms, 500_ms);
+  chassis.pid_drive_exit_condition_set(50_ms, 1_in, 80_ms, 2_in, 500_ms, 500_ms);
 
   chassis.slew_drive_constants_set(7_in, 80);
 }
 
-void far_side()
+void far_side_4_ball()
 {
-  chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
+  front_right_wing.set(true);
+  pros::delay(250);
+  front_right_wing.set(false);
+
+  chassis.pid_turn_set(-18_deg, TURN_SPEED);
   chassis.pid_wait();
+
+  intake.move_velocity(200);
+  chassis.pid_drive_set(52_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
+  chassis.pid_drive_set(-50_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
+  chassis.pid_turn_set(-90_deg, TURN_SPEED);
+  chassis.pid_wait();
+
+  back_right_wing.set(true);
+  chassis.pid_swing_set(ez::LEFT_SWING, -180_deg, SWING_SPEED, 35);
+  chassis.pid_wait();
+  back_right_wing.set(false);
+
+  chassis.pid_drive_set(-8_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
+  chassis.pid_swing_set(ez::LEFT_SWING, 0_deg, SWING_SPEED, 17);
+  chassis.pid_wait();
+
+  chassis.pid_drive_set(38_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
   chassis.pid_turn_set(90_deg, TURN_SPEED);
   chassis.pid_wait();
+
+  intake.move_velocity(-200);
+  chassis.pid_drive_set(11_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+  intake.move_velocity(0);
+
+  chassis.pid_drive_set(-10_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
+  chassis.pid_turn_set(-117_deg, TURN_SPEED);
+  chassis.pid_wait();
+
+  intake.move_velocity(200);
+  chassis.pid_drive_set(23_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
+  chassis.pid_drive_set(-23_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
+  chassis.pid_turn_set(90_deg, TURN_SPEED);
+  chassis.pid_wait();
+  front_left_wing.set(true);
+  front_right_wing.set(true);
+
+  intake.move_velocity(-200);
+  chassis.pid_drive_set(15_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+  intake.move_velocity(0);
+
+  chassis.pid_drive_set(-10_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+  front_left_wing.set(false);
+  front_right_wing.set(false);
+
 }
 
 void close_side()
@@ -188,7 +251,7 @@ void tug(int attempts)
     {
       chassis.drive_sensor_reset();
       chassis.pid_drive_set(-2_in, 20);
-      pros::delay(1000);
+      pros::delay(800);
     }
     // If robot successfully drove back, return
     else

@@ -36,7 +36,7 @@ void initialize()
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
-      Auton("\nFar Side", far_side),
+      Auton("\nFar Side", far_side_4_ball),
       Auton("\nClose Side", close_side),
       Auton("\nSkills", skills),
       Auton("\nExample Drive\n\nDrive forward and come back.", drive_example),
@@ -130,11 +130,12 @@ void opcontrol()
       //  When enabled:
       //  * use A and Y to increment / decrement the constants
       //  * use the arrow keys to navigate the constants
-      if (master.get_digital_new_press(DIGITAL_UP))
+      /*
+      if (master.get_digital_new_press(DIGITAL_))
         chassis.pid_tuner_toggle();
-
+      */
       // Trigger the selected autonomous routine
-      if (master.get_digital_new_press(DIGITAL_DOWN))
+      if (master.get_digital_new_press(DIGITAL_A))
         autonomous();
       chassis.drive_brake_set(MOTOR_BRAKE_COAST); // back to normal after auton
 
@@ -158,8 +159,8 @@ void opcontrol()
     back_left_wing.button_toggle(master.get_digital(DIGITAL_L1));
     back_right_wing.button_toggle(master.get_digital(DIGITAL_L1));
 
-    elevation_1.button_toggle(master.get_digital(DIGITAL_Y));
-    elevation_2.button_toggle(master.get_digital(DIGITAL_Y));
+    elevation_1.button_toggle(master.get_digital(DIGITAL_X));
+    elevation_2.button_toggle(master.get_digital(DIGITAL_X));
 
     pros::delay(ez::util::DELAY_TIME); // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
   }
