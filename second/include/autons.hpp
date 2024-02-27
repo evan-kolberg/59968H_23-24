@@ -25,7 +25,7 @@ void cata_process();
 extern Piston front_left_wing;
 extern Piston front_right_wing;
 extern Piston back_left_wing;
-//extern Piston back_right_wing;
+extern Piston back_right_wing;
 extern Piston elevation_1;
 extern Piston elevation_2;
 

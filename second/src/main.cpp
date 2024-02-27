@@ -1,6 +1,12 @@
 #include "main.h"
 
-ez::Drive chassis({-11, -12, -13}, {1, 2, 3}, 8, 3.25, 600, (60. / 36.));
+ez::Drive chassis(
+{-11, -12, -13},
+{1, 2, 3},
+8,
+3.25,
+600,
+(60. / 36.));
 
 pros::Motor cata(20, pros::E_MOTOR_GEARSET_36);
 pros::Motor intake(7, pros::E_MOTOR_GEARSET_18);
@@ -9,29 +15,31 @@ ez::Piston front_left_wing('A', false);
 ez::Piston front_right_wing('B', false);
 
 ez::Piston back_left_wing('C', false);
-//ez::Piston back_right_wing('D', false);
+ez::Piston back_right_wing('D', false);
 
 ez::Piston elevation_1('E', false);
 ez::Piston elevation_2('F', false);
 
-pros::ADIDigitalIn limit_switch_cata('D');
+pros::ADIDigitalIn limit_switch_cata('G');
 pros::Distance dist_sensor(19);
 
 void cata_process() {
-  while (true) {
-    if (limit_switch_cata.get_value()) {
+  while (true)
+  {
+    if (limit_switch_cata.get_value())
+    {
       cata.move_velocity(0);
-
-      if (dist_sensor.get() < 5) {
+      if (dist_sensor.get() < 5)
+      {
         cata.move_velocity(-100);
         pros::delay(250);
       }
-
-    } else {
+    }
+    else
+    {
       cata.move_velocity(-100);
     }
-
-    pros::delay(20);
+    pros::delay(ez::util::DELAY_TIME);
   }
 }
 
@@ -72,7 +80,7 @@ void disabled() {
 }
 
 void competition_initialize() {
-  
+
 }
 
 /**
@@ -90,8 +98,7 @@ void autonomous() {
   chassis.pid_targets_reset();               // Resets PID targets to 0
   chassis.drive_imu_reset();                 // Reset gyro position to 0
   chassis.drive_sensor_reset();              // Reset drive sensors to 0
-  chassis.drive_brake_set(MOTOR_BRAKE_HOLD); // Set motors to hold.  This helps
-                                             // autonomous consistency
+  chassis.drive_brake_set(MOTOR_BRAKE_HOLD); 
 
   ez::as::auton_selector.selected_auton_call(); // Calls selected auton from autonomous selector
 }
@@ -143,14 +150,11 @@ void opcontrol() {
     front_right_wing.button_toggle(master.get_digital(DIGITAL_L1));
 
     back_left_wing.button_toggle(master.get_digital(DIGITAL_L2));
-    //back_right_wing.button_toggle(master.get_digital(DIGITAL_L2));
+    back_right_wing.button_toggle(master.get_digital(DIGITAL_L2));
 
     elevation_1.button_toggle(master.get_digital(DIGITAL_X));
     elevation_2.button_toggle(master.get_digital(DIGITAL_X));
 
-    pros::lcd::print(7, "Distance %d", dist_sensor.get());
-
     pros::delay(ez::util::DELAY_TIME); // This is used for timer calculations!
-                                       // Keep this ez::util::DELAY_TIME
   }
 }
