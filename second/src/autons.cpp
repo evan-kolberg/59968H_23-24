@@ -27,15 +27,17 @@ void far_side_6_ball() // https://www.youtube.com/watch?v=M5BV6vYFXnU&t=708s&ab_
 
   chassis.pid_drive_set(-32_in, DRIVE_SPEED, true); chassis.pid_wait();
 
-  chassis.pid_swing_set(ez::LEFT_SWING, -45_deg, SWING_SPEED, 5); chassis.pid_wait();
-
   back_left_wing.set(true);
 
-  chassis.pid_drive_set(-15_in, DRIVE_SPEED, true); chassis.pid_wait();
+  chassis.pid_swing_set(ez::LEFT_SWING, -47_deg, SWING_SPEED, 5); chassis.pid_wait();
+
+  chassis.pid_drive_set(-10_in, DRIVE_SPEED, false); chassis.pid_wait();
 
   back_left_wing.set(false);
 
-  chassis.pid_swing_set(ez::LEFT_SWING, -90_deg, SWING_SPEED, 20); chassis.pid_wait();
+  chassis.pid_drive_set(-5_in, DRIVE_SPEED, false); chassis.pid_wait();
+
+  chassis.pid_swing_set(ez::LEFT_SWING, -90_deg, SWING_SPEED, 22); chassis.pid_wait();
 
   chassis.pid_drive_set(-13_in, DRIVE_SPEED, true); chassis.pid_wait();
 
@@ -53,9 +55,14 @@ void far_side_6_ball() // https://www.youtube.com/watch?v=M5BV6vYFXnU&t=708s&ab_
 
   chassis.pid_drive_set(-10_in, DRIVE_SPEED, true); chassis.pid_wait();
 
-  chassis.pid_turn_set(180_deg, TURN_SPEED); chassis.pid_wait();
+  chassis.pid_turn_set(0_deg, TURN_SPEED); chassis.pid_wait();
 
-  intake.move_velocity(0);
+  intake.move_velocity(200);
+
+  chassis.pid_swing_set(ez::LEFT_SWING, 28_deg, SWING_SPEED, 88); chassis.pid_wait();
+
+
+
 
 
 
