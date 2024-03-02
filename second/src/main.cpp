@@ -17,7 +17,7 @@ ez::Piston front_right_wing('B', false);
 ez::Piston back_left_wing('C', false);
 ez::Piston back_right_wing('D', false);
 
-ez::Piston elevation_1('E', false);
+ez::Piston elevation_1('H', false);
 ez::Piston elevation_2('F', false);
 
 pros::ADIDigitalIn limit_switch_cata('G');
@@ -44,11 +44,11 @@ void cata_process() {
 }
 
 void initialize() {
-  ez::ez_template_print();
-
-  pros::delay(500); // Stop the user from doing anything while legacy ports configure
 
   chassis.opcontrol_drive_activebrake_set(0.1); // Sets the active brake kP. We recommend 0.1.
+  chassis.opcontrol_curve_buttons_toggle(false); 
+  chassis.opcontrol_curve_default_set(0, 0); 
+
   default_constants();
 
   ez::as::auton_selector.autons_add({
