@@ -17,7 +17,6 @@ void default_constants();
 void far_side_4_ball();
 void far_side_6_ball();
 
-void close_side();
 void prog_skills();
 
 void cata_process();
