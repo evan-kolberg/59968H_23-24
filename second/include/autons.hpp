@@ -22,5 +22,6 @@ extern Piston elevation_1;
 extern Piston elevation_2;
 
 extern pros::Motor cata;
+extern pros::Motor cata_2;
 extern pros::Motor intake;
 

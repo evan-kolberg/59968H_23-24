@@ -89,7 +89,8 @@ void autonomous() {
 
 void opcontrol() {
 
-  pros::Task cata_process_thread(cata_process);
+  // pros::Task cata_process_thread(cata_process);
+
 
   chassis.drive_brake_set(MOTOR_BRAKE_COAST);
 
@@ -125,6 +126,9 @@ void opcontrol() {
 
     elevation_1.button_toggle(master.get_digital(DIGITAL_X));
     elevation_2.button_toggle(master.get_digital(DIGITAL_X));
+
+    cata.move_velocity(master.get_digital(DIGITAL_B) * 40);
+    cata_2.move_velocity(master.get_digital(DIGITAL_B) * -40);
 
     pros::delay(ez::util::DELAY_TIME);
   }

@@ -103,8 +103,12 @@ void prog_skills()
   chassis.pid_swing_set(ez::RIGHT_SWING, -18_deg, SWING_SPEED, 0); chassis.pid_wait();
   chassis.pid_drive_set(-6_in, DRIVE_SPEED, false); chassis.pid_wait();
   back_right_wing.set(true);
-  pros::Task cata_process_thread(cata_process);
+  // pros::Task cata_process_thread(cata_process);
+  cata.move_velocity(40);
+  cata_2.move_velocity(-40);
   pros::delay(23000);
+  cata.move_velocity(0);
+  cata_2.move_velocity(0);
   back_right_wing.set(false);
   chassis.pid_turn_set(30_deg, TURN_SPEED); chassis.pid_wait();
   chassis.pid_drive_set(32_in, DRIVE_SPEED, false); chassis.pid_wait();
