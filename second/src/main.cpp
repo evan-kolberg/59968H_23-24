@@ -60,15 +60,6 @@ void initialize() {
       Auton("\nFar Side 6-Ball", far_side_6_ball),
       Auton("\nFar Side 4-Ball", far_side_4_ball),
       Auton("\nProgramming Skills", prog_skills),
-      /*
-      Auton("\nExample Drive\n\nDrive forward and come back.", drive_example),
-      Auton("\nExample Turn\n\nTurn 3 times.", turn_example),
-      Auton("\nDrive and Turn\n\nDrive forward, turn, come back. ", drive_and_turn),
-      Auton("\nDrive and Turn\n\nSlow down during drive.", wait_until_change_speed),
-      Auton("\nSwing Example\n\nSwing in an 'S' curve", swing_example),
-      Auton("\nCombine all 3 movements", combining_movements),
-      Auton("\nInterference\n\nAfter driving forward, robot performs differently if interfered or not.", interfered_example),
-      */
   });
 
   chassis.initialize();
